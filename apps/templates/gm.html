@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="layui-col-md12 site-content">
+  <p style="font-weight: bold;font-size: 20px;">温馨提示: </p>
+  <p>1、需求在前面加zb=，如zb=item 12345</p>
+  <p>2、可使用Ctrl+f 进行搜索</p>
+  <p>3、此页面是读取DebugManager.java文件中的DebugCommand参数，指令不确保都能用，如失效可联系后端</p>
+  <table class="layui-table" lay-size="lg" lay-even>
+    <colgroup>
+      <col width="300">
+      <col >
+      <col>
+    </colgroup>
+    <thead>
+      <tr>
+        <th>指令</th>
+        <th>描述</th>
+        <th>示例</th>
+      </tr> 
+    </thead>
+    <tbody id="gmtdbody">
+      <!--
+      <tr>
+        <td>gm1</td>
+        <td>描述1</td>
+        <td>示例1</td>
+      </tr>
+      <tr>
+        <td>gm1</td>
+        <td>gm1</td>
+        <td>gm1</td>
+      </tr>
+      -->
+    </tbody>
+    
+  </table>
+  <button type="button" class="layui-btn" onclick="updatefile()">更新文件</button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function load(){
+      $.ajax({
+        url: '/get-gm',
+        type: 'GET', 
+        dataType: 'json', 
+        success: function(response) {
+          //console.log(response);
+          SetGmElement(response);
+        },
+        error: function(xhr, status, error) {
+          console.error('Error:', error);
+        }
+      });
+    }
+
+    function SetGmElement(data){
+      data = data.data
+      //console.log(data)
+      var gmtbody = document.getElementById("gmtdbody");
+      gmtbody.innerHTML = ''; 
+      for (var i=0;i<data.length;i++)
+      { 
+        //console.log(data[i])
+        var trEle = document.createElement("tr");
+        var tdEleCmd = document.createElement("td");
+        tdEleCmd.innerHTML = "zb=" + data[i].cmd
+        trEle.appendChild(tdEleCmd);
+        var tdEleDesc = document.createElement("td");
+        tdEleDesc.innerHTML = data[i].desc
+        trEle.appendChild(tdEleDesc);
+        var tdEleExample = document.createElement("td");
+        tdEleExample.innerHTML = data[i].example;
+        trEle.appendChild(tdEleExample);
+        gmtbody.appendChild(trEle);
+
+      }
+    }
+    
+    function updatefile(){
+      $.ajax({
+        url: '/update_svn',
+        type: 'GET', 
+        dataType: 'json', 
+        success: function(response) {
+          console.log('succ up!');
+          load();
+        },
+        error: function(xhr, status, error) {
+          console.error('Error:', error);
+        }
+      });
+      }
+</script>
+{% endblock %}

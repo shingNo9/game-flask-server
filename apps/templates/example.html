@@ -1,0 +1,28 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<!--
+    write here
+-->
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function load(){
+      $.ajax({
+      url: '/get-gm',
+      type: 'GET', 
+      dataType: 'json', 
+      success: function(response) {
+        console.log(response);
+      },
+      error: function(xhr, status, error) {
+        console.error('Error:', error);
+      }
+    });
+    }
+  
+</script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.0.7/wordcloud2.js"></script>
+<!--
+    write here
+-->
+<button type="button" class="layui-btn" onclick="showrule()" id="searchbtn">获取svnlog</button>
+<hr />
+<code id="showresult"></code>
+<hr />
+<div id="wordCloud" style="width: 600px; height: 400px;"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function load(){
+      $.ajax({
+      url: '/get-svnlog',
+      type: 'GET', 
+      dataType: 'json', 
+      success: function(response) {
+        console.log(response);
+        displayCheckResult(response.data)
+      },
+      error: function(xhr, status, error) {
+        console.error('Error:', error);
+      }
+    });
+    }
+
+    function displayCheckResult(data) {
+    const logElement = document.getElementById('showresult');
+    let resultString = "";
+
+    data.forEach(item => {
+        resultString += item + "<br>";
+    });
+
+    logElement.innerHTML = resultString;
+}
+  
+</script>
+{% endblock %}

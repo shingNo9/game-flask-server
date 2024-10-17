@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="layui-col-md12 site-content">
+    <style>
+        p {
+            text-indent: 2em;
+        }
+    </style>
+    <hr />
+    <h1 align="center">链接集合</h1>
+    <from class="layui-form">     
+    <div class="layui-container">
+    <hr />
+    <div class="layui-text" id="text1">GM指令：</div>
+    <a href="/gm">http://192.168.1.220:8888/gm</a>
+    <hr />
+    <div class="layui-text" id="text1">excel检测：</div>
+    <a href="/check">http://192.168.1.220:8888/check</a>
+    <hr />
+    <div class="layui-text" id="text1">安装包下载：</div>
+    <a href="http://192.168.1.218/SpaceShip3/Android/App/#" target="_blank">http://192.168.1.218/SpaceShip3/Android/App/#</a>
+    <hr />
+    <div class="layui-text" id="text1">管理后台：</div>
+    <a href="http://192.168.1.108:81/#/login" target="_blank">http://192.168.1.108:81/#/login</a>
+    <p>admin</p>
+    <p style="color: white;">psw</p>
+    <hr />
+    <div class="layui-text" id="text1">客户端打包：</div>
+    <a href="http://192.168.1.218:8080/" target="_blank">http://192.168.1.218:8080/</a>
+    <hr />
+    <div class="layui-text" id="text1">传ftp包：</div>
+    <a href="/upload" target="_blank">http://192.168.1.220:8888/upload</a>
+    <hr />
+
+
+<br />
+<div id="linebar" style="height: 500%;width:100%;margin: 0;"></div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function load(){
+
+    }
+
+</script>
+{% endblock %}

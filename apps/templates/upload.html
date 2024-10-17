@@ -1,0 +1,131 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<!--
+    write here
+
+<form action="http://192.168.1.220:8888//file-upload" method="post" enctype="multipart/form-data">
+    <label for="file">选择文件:</label>
+    <input type="file" id="file" name="file" required>
+    <br><br>
+    <input type="submit" value="上传文件">
+</form>
+-->
+<br />
+<hr />
+<div id="responseMessage"></div>
+<form class="layui-form layui-form-pane" action="">
+    <div class="layui-form-item">
+
+            <select name="name" lay-verify="required" id="selectoption">
+            </select>
+            <br />
+            <button type="button" class="layui-btn" onclick="uploadfile()">上传包体至ftp</button>
+            <div class="layui-form-item">
+                <input type="text" name="title" required  lay-verify="required" placeholder="自定义名称" autocomplete="off" class="layui-input">
+
+              </div>
+            <div class="layui-form-item" id="checkbox">
+                <input type="checkbox" name="like[write]" value="1" title="国内">
+                <input type="checkbox" name="like[read]" value="2" title="gm" checked>
+                <input type="checkbox" name="like[dai]" value="3" title="sdk">
+              </div>
+            <hr />
+            <code id="showresult"></code>
+            <hr />
+    </div>
+</form>
+ 
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function load(){
+        $.ajax({
+            url: '/download-namelist',
+            type: 'GET', 
+            dataType: 'json', 
+            success: function(response) {
+                //console.log(response);
+                setSelectOption(response.data);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+
+    function setSelectOption(data)
+    {
+        var select = document.getElementById("selectoption");
+        select.innerHTML = ''; 
+        for(var i=0;i<data.length;i++)
+        {   
+            //console.log(data[i]);
+            var option = document.createElement("option");
+            option.text = data[i];
+            option.value = i;
+            select.add(option);
+        }
+        layui.use(['form'], function(){
+        var form = layui.form;
+        form.render();
+    });
+    }
+
+    function uploadfile(){
+        var selectElement = document.getElementById('selectoption');
+        var value = selectElement.value;
+        var selectedText = selectElement.options[value].text;
+        //console.log(selectedText);
+        filePost(selectedText);
+        getSelectedValue();
+    }
+    
+    function filePost(fileNanme){
+        const requestData = JSON.stringify({ data: fileNanme });
+        //console.log(requestData);
+        $.ajax({
+            url: '/file-to-ftp',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            timeout: 0,
+            data: requestData,
+            success: function(response) {
+                //console.log(response);
+                showDownloadUrl(response.data)
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+
+    function showDownloadUrl(data) {
+        var responseMessage = document.getElementById("showresult");
+        responseMessage.innerHTML = data;
+    }
+
+    function getSelectedValue() {
+        // 获取所有复选框
+        checkboxContainer = document.getElementById("checkbox");
+        checkboxes = checkboxContainer.getElementsByTagName("input");
+        selectedTitles = [];
+        // 遍历复选框并检查是否被勾选
+        for (let i = 0; i < checkboxes.length; i++) {
+        // 检查当前元素是否被勾选
+            if (checkboxes[i].checked) {
+            // 将勾选的复选框的 title 添加到数组
+                selectedTitles.push(checkboxes[i].title);
+                //console.log(checkbox.name);
+                //console.log(checkbox.value);
+            }
+        }
+        
+
+        // 输出已勾选的内容
+        console.log("勾选的内容:", selectedTitles);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="renderer" content="webkit">
+    <!--
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <script src="../static/script/jquery-3.7.1.slim.min.js"></script>
+    -->
+    <title>YWGN</title>
+    <link rel="stylesheet" href="../static/css/layui.css" media="all">
+    <script src="../static/script/jquery-3.7.1.min.js"></script>
+    <script src="../static/script/layui.js" charset="utf-8"></script>
+    <!--<script src="../static/script/socket.io.js"></script>-->
+</head>
+
+<body onload=load()>
+	<ul class="layui-nav">
+		<li class="layui-nav-item "><a href="/">主页</a></li>
+        <!--
+		<li class="layui-nav-item ">
+			<a href="/gm">gm</a>
+		</li>
+        
+        <li class="layui-nav-item ">
+			<a href="/gm">接口测试</a>
+		</li>
+        -->
+	</ul>
+    <div class="container body-content">
+        <div class="layui-container">
+            <div class="layui-row layui-col-space5">
+                <div class="layui-container layui-row">
+                    {% block content %}
+
+                    {% endblock %}
+                </div>
+            </div>
+
+        </div>
+        <footer>
+            <p align="right">product &copy; by &dollar;hing&trade;</p>
+        </footer>
+    </div>
+    {% block scripts %}{% endblock %}
+</body>

@@ -1,0 +1,159 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<p style="font-weight: bold; font-size: 20px;">温馨提示:</p>
+<p>1、页面仅对svn上的excel表进行检测和搜索，无法处理本地表格，检测前会先更新svn。</p>
+<p>2、如果执行结果过长，有可能会显示不全。</p>
+<p>3、检测需要一点时间，请勿关闭页面。</p>
+<p>4、如需添加规则或者其他问题可联系shing。</p>
+<hr />
+<p>excel表格检测，主要是检测一些id配置是否有效</p>
+<button type="button" class="layui-btn" onclick="startCheck()" id="checkbtn">开始检测</button>
+<hr />
+<p>搜索所有excel表中的文本，可搜索多个文本，用“，”逗号分隔，如：1234，5678，90123</p>
+<input type="text" name="title" required lay-verify="required" placeholder="请输入需要搜索的文本" autocomplete="off" class="layui-input" id="searchtext">
+<br />
+<button type="button" class="layui-btn" onclick="startSearch()" id="searchbtn">开始搜索</button>
+<br />
+<hr />
+<code id="showresult"></code>
+<hr />
+<button type="button" class="layui-btn" onclick="showrule()" id="searchbtn">显示规则</button>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function showrule(){
+        $.ajax({
+        url: '/get-checkrule',
+        type: 'GET',
+        dataType: 'json',
+        timeout: 0,
+        success: function (response) {
+            //console.log(response);
+            setrule(response);
+        },
+        error: function (xhr, status, error) {
+            console.error('Error:', error);
+            console.error('Response Text:', xhr.responseText);
+        }
+    });
+    }
+
+    function setrule(data){
+        clearResult();
+        const formattedJson = JSON.stringify(data.data, null, 2);
+        rule = document.getElementById('showresult')
+        rule.innerHTML += "one-to-one规则：table表的column列是否在reference_table的reference_column列中<br>";
+        rule.innerHTML += "rewards_int规则：table表的column列中的掉落id是否在各个表中(Item,Equipment,Warship等等)<br>";
+        rule.innerHTML += "rewards_int_array_2规则：table表的column列中的list里的掉落id是否在各个表中(Item,Equipment,Warship等等)<br>";
+        rule.innerHTML += "rewards_int_array_3规则：table表的column列中的list里的掉落id是否在各个表中(Item,Equipment,Warship等等)<br>";
+        rule.innerHTML += "id_in_array规则：table表的column列中的list里的id是否在reference_table的reference_column列中<br>";
+        rule.innerHTML += "equipment-position-des规则：主动装置，且subtype在EquipmentPositioning表中的 装置技能定位描述不为空<br>";
+        rule.innerHTML += "condition-column-check规则：table 中的column列 如果entitytype 为 1查warship表中是否存在id，3044的查交互建筑表是否存在id<br>";
+        rule.innerHTML += "value-must-set规则：tableb表中的column列不能为空<br>";
+        rule.innerHTML += "columns-value-check规则：table 中的column1列为x时，conlumn2列必须为y<br>";
+        rule.innerHTML += "columns-only-one规则：table 中的column列值是否唯一<br>";
+        rule.innerHTML += "array2-in-column规则：检测2维数组index的值是否在ref_table的ref_column列中<br>";
+        rule.innerHTML += "-ban因为一直没改，都是空，会影响，暂时先ban了<br>";
+        rule.innerHTML += '<pre>' + formattedJson + '</pre>';
+    }
+
+// 开始检测函数
+function startCheck() {
+    const btn = document.getElementById('checkbtn');
+    setButtonDisabled(btn, true);
+    btn.textContent = '检测中...';
+    clearResult();
+    
+    $.ajax({
+        url: '/get-checklog',
+        type: 'GET',
+        dataType: 'json',
+        timeout: 0,
+        success: function (response) {
+            console.log(response);
+            displayCheckResult(response.data);
+            setButtonDisabled(btn, false);
+            btn.textContent = '开始检测';
+        },
+        error: function (xhr, status, error) {
+            console.error('Error:', error);
+            console.error('Response Text:', xhr.responseText);
+            alert(xhr.responseText);
+            setButtonDisabled(btn, false);
+            btn.textContent = '开始检测';
+        }
+    });
+}
+
+// 开始搜索函数
+function startSearch() {
+    const btn = document.getElementById('searchbtn');
+    const input = document.getElementById('searchtext');
+    console.log(input.value);
+    if (input.value.trim() === "") {
+        alert("请输入需要搜索的文本");
+        return;
+    }
+    const requestData = JSON.stringify({ data: input.value });
+    
+    setButtonDisabled(btn, true);
+    btn.textContent = '搜索中...';
+    clearResult();
+    
+    $.ajax({
+        url: '/get-searchlog',
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json',
+        timeout: 0,
+        data: requestData,
+        success: function (response) {
+            // console.log(response); // 可选调试输出
+            displayCheckResult(response.data);
+            setButtonDisabled(btn, false);
+            btn.textContent = '开始搜索';
+        },
+        error: function (xhr, status, error) {
+            console.error('Error:', error);
+            console.error('Response Text:', xhr.responseText.error);
+            alert(xhr.responseText);
+            setButtonDisabled(btn, false);
+            btn.textContent = '开始搜索';
+        }
+    });
+}
+
+// 清空结果显示
+function clearResult() {
+    document.getElementById('showresult').innerHTML = "";
+}
+
+// 设置检查结果显示
+function displayCheckResult(data) {
+    const logElement = document.getElementById('showresult');
+    let resultString = "";
+
+    data.forEach(item => {
+        resultString += item + "<br>";
+    });
+
+    logElement.innerHTML = resultString;
+}
+
+// 设置按钮禁用或启用状态
+function setButtonDisabled(btn, disabled) {
+    btn.classList.toggle('layui-btn-disabled', disabled);
+    btn.disabled = disabled;
+}
+
+// 页面加载函数
+function load() {
+    // 可在此添加页面加载时需要执行的逻辑
+}
+
+// 页面加载时调用
+load();
+</script>
+{% endblock %}

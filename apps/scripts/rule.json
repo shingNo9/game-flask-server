@@ -1,0 +1,359 @@
+{
+	"relashionships": [
+        {
+			"type": "condition-column-check",
+			"table": "CombatConfiguration",
+			"column": "warshipId",
+			"condition":{
+                "type_column":"entityType",
+                "values":["1","3044"],
+                "tables":["Warship","CombatInterBuild"],
+                "columns":["warshipId","buildId"]
+                }
+		},
+		{
+			"type": "one-to-one",
+			"table": "Drone",
+			"column": "equipment",
+			"reference_table": "Equipment",
+			"reference_column": "equipmentId"
+		},
+		{
+			"type": "one-to-one",
+			"table": "EquipmentRefit",
+			"column": "oldEquipmentId",
+			"reference_table": "Equipment",
+			"reference_column": "equipmentId"
+		},
+		{
+			"type": "one-to-one",
+			"table": "EquipmentShow",
+			"column": "combatId",
+			"reference_table": "Combat",
+			"reference_column": "combatId"
+		},
+		{
+			"type": "one-to-one",
+			"table": "MultiverseCombat",
+			"column": "combatId",
+			"reference_table": "Combat",
+			"reference_column": "combatId"
+		},
+		{
+			"type": "one-to-one",
+			"table": "Visitor",
+			"column": "startUnitId",
+			"reference_table": "Event",
+			"reference_column": "unitId"
+		},
+		{
+			"type": "one-to-one",
+			"table": "EquipmentRefit",
+			"column": "newEquipmentId",
+			"reference_table": "Equipment",
+			"reference_column": "equipmentId"
+		},
+		{
+			"type": "rewards_int",
+			"table": "DropPlan",
+			"column": "itemId"
+		},
+		{
+			"type": "id_in_array",
+			"table": "CombatRandomList",
+			"column": "combatIdList",
+			"reference_table": "Combat",
+			"reference_column": "combatId"
+		},
+		{
+			"type": "id_in_array",
+			"table": "CrewRelation",
+			"column": "relatedCrew",
+			"reference_table": "CrewRelation",
+			"reference_column": "friendshipId"
+		},
+		{
+			"type": "id_in_array",
+			"table": "Visitor",
+			"column": "leaveUnitIds",
+			"reference_table": "Event",
+			"reference_column": "unitId"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "EquipmentRefitEx",
+			"column": "addCost"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "EquipmentLevelPlan",
+			"column": "cost"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "ScienceSkill",
+			"column": "itemReward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "Build",
+			"column": "upgradeResources"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "LegionWelfareBox",
+			"column": "reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "CampPlan",
+			"column": "rewardItem"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "WarshipFlagshipSkillPlan",
+			"column": "cost"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "UltraChallengeDailyReward",
+			"column": "Reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "UltraChallengeRankReward",
+			"column": "Reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "CombatPass",
+			"column": "rewardPreview"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "AchievementBox",
+			"column": "reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "LegionBuild",
+			"column": "helpReward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "LegionMilestone",
+			"column": "reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "Milestone",
+			"column": "reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "EventDynamicRewardList",
+			"column": "extraRewardList"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "ActivitySign",
+			"column": "reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "DungeonSetting",
+			"column": "dungeonTaskReward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "DungeonSetting",
+			"column": "offlineRewardList"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "ActivityStarExplore",
+			"column": "reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "BlueprintFormula",
+			"column": "material"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "BlueprintFormula",
+			"column": "products"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "ActivitySpaceLordRank",
+			"column": "Reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "SpaceProbeReward",
+			"column": "reward1"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "SpaceProbeReward",
+			"column": "reward2"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "LegionTask",
+			"column": "reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "ActivityRecharge",
+			"column": "reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "LegionGvgRank",
+			"column": "Reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "ActivityVip",
+			"column": "reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "Task",
+			"column": "reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "ReprisalGalaxy",
+			"column": "itemReward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "Event",
+			"column": "successReward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "Event",
+			"column": "failureReward"
+		},
+		{
+			"type": "id_in_array",
+			"table": "Event",
+			"column": "extraDynamicReward",
+			"reference_table": "EventDynamicRewardList",
+			"reference_column": "indexId"
+		},
+		{
+			"type": "rewards_int_array_3",
+			"table": "Event",
+			"column": "stageReward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "CombatPassPlan",
+			"column": "reward1"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "CombatPassPlan",
+			"column": "reward2"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "DailyTaskBox",
+			"column": "reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "MainTaskChapter",
+			"column": "reward"
+		},
+		{
+			"type": "rewards_int_array_2",
+			"table": "MultiverseStage",
+			"column": "reward"
+		},
+        {
+			"type": "columns-value-check",
+			"table": "Dialogue",
+            "column":"dialogueId",
+            "filter":{
+                "value":"All",
+                "column": "options"
+            },
+			"check_column":"skip"
+		},
+		{
+			"type": "value-must-set-ban",
+			"table": "Equipment",
+            "column":"equipmentId",
+			"condition":{
+                "value": "All",
+                "type_column":["iconRN","skillIconRN"]
+            }
+		},
+        {
+			"type": "value-must-set-ban",
+			"table": "Buff",
+			"column": "showIcon",
+            "condition":{
+                "value": "1",
+			    "type_column":["buffIconRN"]
+            }
+			
+		},
+        {
+			"type": "equipment-position-des",
+			"table": "Equipment",
+            "column": "equipmentId",
+			"condition": [["equipmentType","2"],["subType","EquipmentPositioning","equipmentSubType"]],
+			"check":"equipmentPositioningDes"
+		},
+		{
+			"type": "columns-only-one",
+			"table": "Combat",
+			"columns": ["defaultSceneBuff","stageBuffPlanId"],
+			"none_str":"[0]"
+		},
+		{
+			"type": "one-to-one",
+			"table": "Combat",
+			"column": "combatUnitId",
+			"reference_table": "CombatConfiguration",
+			"reference_column": "combatUnitId"
+		},
+		{
+			"type": "array2-in-column",
+			"table": "Crew",
+			"column": "unlock",
+			"condition":{
+                "index": "2",
+				"table":"CrewStory",
+			    "column":"entryNum"
+            }
+		},
+        {
+			"type": "value-must-set-2",
+			"table": "GuideBook",
+			"column": "voiceIcon",
+            "condition":{
+                "value": "All",
+			    "type_column":["voiceName"]
+            }
+			
+		},
+		{
+			"type": "value-must-set",
+			"table": "CombatConfiguration",
+			"column": "id",
+            "condition":{
+                "value": "All",
+			    "type_column":["warshipInitPos"]
+            }
+			
+		}
+	]
+}

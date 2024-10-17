@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<!--
+    write here
+-->
+<br />
+<hr />
+<p>客户端脚本：</p>
+<br />
+<button type="button" class="layui-btn" onclick="hotfixres()">热更资源</button>
+<button type="button" class="layui-btn" onclick="refreshcdn()">刷新CDN</button>
+<br />
+<hr />
+<p>服务端脚本：</p>
+<br />
+<button type="button" class="layui-btn" onclick="serverpackage()">服务器打包</button>
+{% endblock %}
+
+{% block scripts %}
+<script>
+
+    function load(){
+
+    }
+
+    function hotfixres(){
+        $.ajax({
+            url: '/hotfixres',
+            type: 'GET', 
+            dataType: 'json', 
+            success: function(response) {
+                console.log(response);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+
+    function refreshcdn(){
+        $.ajax({
+            url: '/refreshcdn',
+            type: 'GET', 
+            dataType: 'json', 
+            success: function(response) {
+                console.log(response);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+
+    function serverpackage(){
+        $.ajax({
+            url: '/serverpackage',
+            type: 'GET', 
+            dataType: 'json', 
+            success: function(response) {
+                console.log(response);
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
+    }
+</script>
+{% endblock %}
