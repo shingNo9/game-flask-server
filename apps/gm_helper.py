@@ -2,7 +2,7 @@
 import os
 
 def format_gm_list():
-    file_path = "./apps/svn_gm_folder/debug/DebugManager.java"
+    file_path = ""
     if not os.path.exists(file_path):
         return None
     

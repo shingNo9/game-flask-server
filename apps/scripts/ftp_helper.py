@@ -7,33 +7,33 @@ import socks
 import re
 import urllib.parse
 import os
+import hashlib
+from scripts.EventCls import Event
+from flask_socketio import emit
 
-#需要使用代理来连接ftp
+#需要使用代理来连接的ftp
 PROXY_HOST = ""
-PROXY_PORT = 123
+PROXY_PORT = 
 PROXY_USER = ""
 PROXY_PSW = ""
 
 FTP_HOST = ""
-FTP_PORT = 21
+FTP_PORT = 
 FTP_USER = ""
 FTP_PSW = ""
 
-#下面2个测试用的不需要
-#test_FILE_TO_UPLOAD = "/root/test.sh"
-#test_TARGET_PATH = "/package/autoupload/testsucc.txt"
 
 #下载
-PKG_DOWNLAOD_URL = "http://192.168.1.218/"
-DOWANLOAD_FOLDER = "./apps/package"
+PKG_DOWNLAOD_URL = ""
+DOWANLOAD_FOLDER = ""
 
 #上传
-UPLOAD_PATH = "/package/autoupload/"
+UPLOAD_PATH = ""
 #该函数是全流程，保留用来查看学习
 def upload_file_to_ftp_old_no_use(file_name, target_name):
     print("开始上传文件到 FTP 服务器...")
-    file_path = "./apps/package/" + file_name
-    target_path = "/package/autoupload/" + target_name
+    file_path = "" + file_name
+    target_path = "" + target_name
     try:
          # 使用 SOCKS 代理连接 FTP
         socks.set_default_proxy(socks.HTTP, PROXY_HOST, PROXY_PORT, True, PROXY_USER, PROXY_PSW)
@@ -66,20 +66,21 @@ def create_package_name(file_name):
     gm = ""
     #是否有sdk
     sdk = ""
+    #是否连接
     server = ""
     print(file_name)
     if "国内":
-        head = "Y"
+        head = ""
     else:
         head = ""
     if "GM":
         gm = "gm_"
     if "sdk":
         sdk = "sdk_"
-    if "gray":
-        server = "gray_"
+    if "":
+        server = "_"
     else:
-        server = ""
+        server = "_"
     version = extract_numbers(file_name)
     name = f"{head}{gm}{sdk}{server}{version}.apk"
     print(name)
@@ -87,7 +88,8 @@ def create_package_name(file_name):
     
 def extract_numbers(file_name):
     # 匹配两个连字符之间的数字
-    match = re.search(r'-(\d+)-', file_name)
+    #match = re.search(r'-(\d+)-', file_name)
+    match = re.search(r'(\d+)', file_name)
     if match:
         number = match.group(1)
         return number
@@ -98,12 +100,8 @@ def extract_numbers(file_name):
 #获取资源版本号，但是好像比较复杂先不管
 def get_res_version():
     print("start")
-    #海外分支安卓打包
-    url = "http://192.168.1.218:8080/job/%E6%B5%B7%E5%A4%96%E5%88%86%E6%94%AF%E5%AE%89%E5%8D%93%E6%89%93%E5%8C%85/21/console"
-    #灰度分支安卓打包
-    #url = "http://192.168.1.218:8080/job/%E9%9B%B7%E9%9C%86%E7%81%B0%E5%BA%A6%E5%88%86%E6%94%AF%E5%AE%89%E5%8D%93%E6%89%93%E5%8C%85/262/console"
-    #灰度分支安卓热更
-    #url = "http://192.168.1.218:8080/job/%E9%9B%B7%E9%9C%86%E7%81%B0%E5%BA%A6%E5%88%86%E6%94%AF%E5%AE%89%E5%8D%93%E7%83%AD%E6%9B%B4/89/console"
+    url = ""
+
     USERNAME = ''
     PASSWORD = ''
     try:
@@ -123,7 +121,6 @@ def get_res_version():
 
 #获取下载页面的包名列表
 def get_pkg_name_list():
-    #url = ''
     # 发送 GET 请求
     response = requests.get(PKG_DOWNLAOD_URL)
     # 检查请求是否成功
@@ -150,8 +147,7 @@ def get_pkg_name_list():
 def download_pkg_by_name(pkg_name):
     print("------startdownload-------")
     if not check_pkg_already_download(pkg_name):
-    #file_url = ''
-        file_url = PKG_DOWNLAOD_URL + chinese_to_http(pkg_name)
+        file_url = PKG_DOWNLAOD_URL.rstrip('#') + chinese_to_http(pkg_name)
         print(f"download {pkg_name} from {file_url}")
         response = requests.get(file_url)
         # 检查请求是否成功
@@ -242,9 +238,7 @@ def check_ftp_file_exists(ftp, target_file):
         return False
 
 def upload_file_to_ftp(file_name, target_name):
-    #file_path = "./apps/package/" + file_name
     file_path = DOWANLOAD_FOLDER + file_name
-    #target_path = "/package/autoupload/" + target_name
     target_path = UPLOAD_PATH + target_name
     ftp = connect_ftp_server()
     if ftp is None or ftp == False:
@@ -261,7 +255,8 @@ def upload_file_to_ftp(file_name, target_name):
         # 上传文件
         with open(file_path, "rb") as f:
             ftp.storbinary(f"STOR {target_path}", f)
-        msg=f"{target_path}上传成功"
+        msg = f"{target_path}上传成功"
+        print(msg)
         return True, msg
     except Exception as e:
         msg = f"发生错误: {e}"
@@ -269,3 +264,76 @@ def upload_file_to_ftp(file_name, target_name):
     finally:
         disconnect_ftp_server(ftp)
 
+def upload_apk_to_leiting_ftp(post_data):
+    data = post_data['data']
+    file_name = data['file']
+    rename = data['rename']
+    if rename == "1":
+        rename = ""
+    else:
+        rename = ""
+    #下载apk
+    download_pkg_by_name(file_name)
+    #上传至ftp
+    version = extract_numbers(file_name)
+    rename = f"{rename}_{version}.apk"
+    res, msg = upload_file_to_ftp(file_name, rename)
+
+    file_md5 = calculate_md5( DOWANLOAD_FOLDER + file_name)
+    print(f"file_md5:{file_md5}")
+
+    #删除下载的apk
+    delete_download_file_by_name(file_name)
+    msg = msg + f""
+    
+    return res, msg
+
+def calculate_md5(file_path):
+    """计算指定文件的 MD5 值"""
+    md5_hash = hashlib.md5()
+    # 以二进制方式打开文件
+    with open(file_path, "rb") as f:
+        # 每次读取 4096 字节
+        for byte_block in iter(lambda: f.read(4096), b""):
+            # 更新哈希对象
+            md5_hash.update(byte_block)
+    # 返回 MD5 值的十六进制表示
+    return md5_hash.hexdigest()
+
+#
+#方法一样，但是进度会传给前端
+def upload_with_socket(sid, send_func, data):
+    data = data['data']
+    file_name = data['file']
+    rename = data.get('rename', "")
+    download_pkg_by_name_send_progress(file_name, send_func, sid)
+    send_func(f'{file_name}下载完成', sid)
+    
+
+#下载指定包名的APK文件
+def download_pkg_by_name_send_progress(pkg_name, callback, sid):
+    print_both(callback, sid, "------startdownload-------")
+    if not check_pkg_already_download_send_progress(pkg_name, callback, sid):
+        file_url = PKG_DOWNLAOD_URL + chinese_to_http(pkg_name)
+        print_both(callback, sid, f"download {pkg_name} from {file_url}")
+        response = requests.get(file_url)
+        response.raise_for_status()
+        
+        file_path = os.path.join(DOWANLOAD_FOLDER, pkg_name)  
+        
+        with open(file_path, 'wb') as f:
+            f.write(response.content)
+        print_both(callback, sid, f"{pkg_name} download success!")
+
+def check_pkg_already_download_send_progress(pkg_name, callback, sid):
+    file_path = os.path.join(DOWANLOAD_FOLDER, pkg_name)
+    if os.path.exists(file_path):
+        print_both(callback, sid, f"{pkg_name}文件存在")
+        return True
+    else:
+        print_both(callback, sid, f"{pkg_name}文件不存在")
+        return False
+
+def print_both(send_func, sid, msg):
+    print(msg)
+    send_func(msg, sid)

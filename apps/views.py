@@ -1,8 +1,8 @@
 #coding=utf-8
-
-from apps import app
 from flask import render_template, request, redirect,jsonify
+from flask_socketio import SocketIO, emit
 from io import BytesIO
+from apps import app, socketio
 import json
 import time
 import sys
@@ -16,6 +16,7 @@ import gm_helper
 import scripts.excel_helper
 import scripts.svn_helper
 import scripts.ftp_helper
+import scripts.background_gm as bg_gm
 
 app.config["JSON_AS_ASCII"] = False
 
@@ -48,6 +49,11 @@ def upload():
 
     return render_template('upload.html')
 
+@app.route('/bggm')
+def background_gm():
+    
+    return render_template('backgroundgm.html')
+
 
 #gm request
 @app.route('/get-gm', methods=['GET'])
@@ -60,7 +66,7 @@ def get_gm():
 def update_svn():
     '''
     try:
-        # '/root/myproject/game-flask-server/apps/svn_gm_folder/debug'
+        # ''
         result = subprocess.run(['svn', 'update', './apps/svn_gm_folder/debug'], capture_output=True, text=True)
         if result.returncode == 0:
             return jsonify({'message': 'SVN updated successfully', 'output': result.stdout}), 200
@@ -70,7 +76,11 @@ def update_svn():
         return jsonify({'message': 'An error occurred', 'error': str(e)}), 500
     '''
     cmd = 'svn up ./apps/svn_gm_folder/debug'
-    execute_bash(cmd)
+    res = execute_bash(cmd)
+    try:
+        return to_json(res)
+    except Exception as e:
+        return jsonify({'message': 'An error occurred', 'error': str(e)}), 500
 
 #excel checklog request
 @app.route('/get-checklog', methods=['GET'])
@@ -81,13 +91,14 @@ def get_checklog():
         res = scripts.excel_helper.main('check')
         return to_json(res)
     except Exception as e:
+        print(e)
         return jsonify({'message': 'An error occurred', 'error': str(e)}), 500
 
 
 @app.route('/get-searchlog', methods=['POST'])
 def get_searchlog():
     data = request.json
-    cmd = 'svn up /root/platform/doc/excel'
+    cmd = 'svn up path'
     execute_bash(cmd)
     try:
         res = scripts.excel_helper.main('search', data["data"])
@@ -98,6 +109,7 @@ def get_searchlog():
 @app.route('/get-checkrule', methods=['GET'])
 def show_excel_check_rule():
     res = scripts.excel_helper.read_json_config()
+    #res = scripts.excel_helper.main('check')
     return to_json(res)
     
 
@@ -117,7 +129,7 @@ def file_upload():
     if file.filename == '':
         return jsonify({"error": "文件名不能为空"}), 400
     if file:
-        UPLOAD_FOLDER = "./apps/package"
+        UPLOAD_FOLDER = "path
         file.save(os.path.join(UPLOAD_FOLDER, file.filename))
         return jsonify({"message": "文件上传成功", "filename": file.filename}), 200
     else:
@@ -126,22 +138,13 @@ def file_upload():
 
 @app.route('/file-to-ftp', methods=['POST'])
 def file_to_ftp():
-    file_name = request.json['data']
+    post_data = request.json['data']
+    print(post_data)
+    post_data = json.loads(post_data)
     #scripts.ftp_helper.get_res_version()
-    '''
-    scripts.ftp_helper.download_pkg_by_name(file_name)
+
     #time.sleep(5)
-    upload_result, msg = scripts.ftp_helper.upload_file_to_ftp(file_name, file_name)
-    #scripts.ftp_helper.delete_download_file_by_name(file_name)
-    
-    if upload_result:
-        res =to_json(f"{file_name}")
-        return res
-    else:
-        res =to_json(msg)
-        return res
-    '''
-    msg = scripts.ftp_helper.create_package_name(file_name)
+    upload_result, msg = scripts.ftp_helper.upload_apk_to_leiting_ftp(post_data)
     res =to_json(msg)
     return res
 
@@ -149,6 +152,15 @@ def file_to_ftp():
 def get_pkg_list():
     file_name_list = scripts.ftp_helper.get_pkg_name_list()
     return to_json(file_name_list)
+
+@app.route('/bg_post', methods=['POST'])
+def bg_post():
+    post_data = request.json['data']
+    #print(post_data)
+    post_data = json.loads(post_data)
+    data = bg_gm.common_gm_request(post_data)
+    res =to_json(data)
+    return res
 
 def execute_bash(bash_cmd):
     result = subprocess.run(bash_cmd, capture_output=True, text=True,shell=True,)
@@ -166,3 +178,32 @@ def to_json(data):
     dict['data'] = data
     data_json = json.dumps(dict)
     return data_json
+
+# 建立连接时触发的事件
+@socketio.on("connect")
+def connect(message):
+    print(request.remote_addr)
+    print(request.sid)
+    #emit('process_response', {'data': f'connected:{request.sid}'})
+
+# 自定义事件:my_event
+@socketio.on("my_event")
+def my_event(message):
+    print(request.remote_addr)
+    print(request.sid)
+    sid = request.sid
+    #emit('my response', {'data': 'got it!'})
+    print("-----------------")
+    print(message)
+    post_data = json.loads(message)
+    data = post_data['data']
+    print(data)
+    data = json.loads(data)
+    #scripts.ftp_helper.get_res_version()
+
+    #time.sleep(5)
+    #emit('process_response', "123123", room=sid)
+    scripts.ftp_helper.upload_with_socket(sid ,sokect_send_to_client , data)
+
+def sokect_send_to_client(message, sid):
+    emit('process_response', {'data': message}, room=sid)

@@ -354,6 +354,23 @@
 			    "type_column":["warshipInitPos"]
             }
 			
+		},
+		{
+			"type": "combat-condition-warship-check",
+			"table": "Combat",
+			"target_table": "CombatConfiguration"
+		},
+		{
+			"type": "combat-cycle-check",
+			"table": "Combat",
+			"column": "targetMissionParams",
+			"value": "[[1002]]",
+			"select_column" : "combatUnitId",
+            "condition":{
+				"table":"CombatConfiguration",
+                "column": "cycleParams",
+			    "value": "0"
+            }
 		}
 	]
 }

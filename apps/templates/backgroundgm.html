@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block content %}
+
+<!--
+    write here
+-->
+<p>说明：url，rid 为玩家id，zoneId默认为内网，其他具体参数查看接口文档，目前仅对内网测试服有效<br>
+示例：<br>
+    踢下线：{"url": "kickOff", "rid": ""}<br>
+    改名：{"url": "rename", "rid": "", "newName": "new名"}<br>
+    发送邮件:{"url": "sendMail", "title": "邮件标题", "content": "邮件内容", "validTime" : 36000, "isBroadcast": false,"isAllServers": false, "receiverList": "", "attachment": [{"itemId": "","num": 1},{ "itemId": "", "num": 2 } ], "author" : "系统", "mailType":"world"}<br>
+    发跑马灯:{"url": "startBroadcast", "content" : "跑马灯的汉子，你威武雄壮！！！跑跑跑！！！啦啦啦！！！", "isAllServers" : false, "startDate" : "2024-11-18 17:10:00", "endDate" : "2024-11-18 17:11:00", "interval":10}
+</p>
+<br />
+<input type="text" name="title" required  lay-verify="required" placeholder="请求的json" autocomplete="off" class="layui-input" id="inputname">
+<button type="button" class="layui-btn" onclick="sendRequest()">发送请求</button>
+<hr />
+<code id="response"></code>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function load(){
+
+    }
+
+    function sendRequest(){
+        var inputValue = document.getElementById("inputname").value;
+        const requestData = JSON.stringify({ data: inputValue });
+        postRequest('/bg_post', requestData, showResponse);
+    }
+
+    function showResponse(response){
+        console.log(response);
+        var responseMessage = document.getElementById("response");
+        responseMessage.innerHTML = response;
+    }
+
+</script>
+{% endblock %}

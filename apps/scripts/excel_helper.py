@@ -50,7 +50,7 @@ def check_excel():
 
 #读取所有excel
 def get_all_excel_table(): 
-    path = r"/root/platform/doc/excel"
+    path = r""
     excel_list = get_all_xlsx_files(path)
     return AllExcelTable(excel_list)
 
@@ -108,7 +108,10 @@ def value_in_bagtype_table(alltable, value):
     else:
         return None
 
+#str 字符串转为list
 def get_value_in_list(value):
+    if value == "":
+        return []
     nested_list = json.loads(value)
     return to_str_list(nested_list)
 
@@ -276,6 +279,86 @@ def check_columns_only_one(alltable, config):
         if len(check_list) > 1:
             CheckLog.add(f"{table_name}表{row.get_index()}行{column_name_str[:-1]}列都有值，只能有一个列有值")
 
+#循环参数检测
+#combat表中targetMissionParams字段仅为1002的时候，对应的刷怪表（CombatConfiguration）中，不能有循环参数（cycleParams）的第二个值小于等于0的情况
+def check_combat_mission_params(alltable, config):
+    table_name = config.get('table')
+    column = config.get('column')
+    value = config.get('value')
+    select_column = config.get('select_column')
+    condition = config.get('condition')
+    condition_table = condition.get('table')
+    condition_column = condition.get('column')
+    condition_value = condition.get('value')
+    excel_table = alltable.get_excel_by_name(table_name)
+    check_table = alltable.get_excel_by_name(condition_table)
+    select_list = []
+    for row in excel_table.rows:
+        cell = row.get_cell_by_name(column)
+        if cell.value == value:
+            select_column_value = row.get_cell_by_name(select_column).value
+            if select_column_value != "":
+                select_list.append(select_column_value)
+    for row in check_table.rows:
+        row_id = row.get_cell_by_name(select_column).value
+        if row_id in select_list:
+            check_cell = row.get_cell_by_name(condition_column)
+            if check_cell.value == "":
+                continue
+            cell_param_list = get_value_in_list(check_cell.value)
+            if isinstance(cell_param_list, list):
+                if len(cell_param_list) > 1:
+                    check_value = cell_param_list[1]
+                    if int(check_value) <= int(condition_value):
+                        CheckLog.add(f"{condition_table}表{row.get_index()}行,combatunitid为{row_id}的{condition_column}列的值:{check_cell.value}，第二个参数必须大于{condition_value}")
+
+def check_combat_condittion_warship(alltable, config):
+    table_name = config.get('table')
+    target_table = config.get('target_table')
+    check_column_1 = "targetMissionParams"
+    check_column_2 = "endMissionParams"
+    check_column_3 = "spWarshipDifficultyAdjust"
+    check_column_4 = "combatUnitId"
+    target_column_1 = "warshipId"
+    excel_table = alltable.get_excel_by_name(table_name)
+    check_table = alltable.get_excel_by_name(target_table)
+    warshipId_list = check_table.get_column_value_list("warshipId")
+    warship_type_list = [""]
+    check_list = []
+    combat_unit_shipid_dict = {}
+    for row in check_table.rows:
+        warship_id = row.get_cell_by_name(target_column_1).value
+        check_unitId = row.get_cell_by_name(check_column_4).value
+        if check_unitId in combat_unit_shipid_dict:
+            combat_unit_shipid_dict[check_unitId].append(warship_id)
+        else:
+            combat_unit_shipid_dict[check_unitId] = [warship_id]
+
+    for row in excel_table.rows:
+        win_condition = row.get_cell_by_name(check_column_1).value
+        end_condition = row.get_cell_by_name(check_column_2).value
+        sp_condition = row.get_cell_by_name(check_column_3).value
+        combat_unit_id = row.get_cell_by_name(check_column_4).value
+        win_condition_list = get_value_in_list(win_condition)
+        end_condition_list = get_value_in_list(end_condition)
+        sp_condition_list = get_value_in_list(sp_condition)
+        target_warship_id_list = combat_unit_shipid_dict.get(combat_unit_id)
+        if win_condition != "" and win_condition != "[]" and win_condition != "[[]]":
+            for condition in win_condition_list:
+                if condition[0] in warship_type_list:
+                    if condition[1] not in target_warship_id_list:
+                        CheckLog.add(f"{table_name}表{row.get_index()}行,combatunitid为{combat_unit_id}的win条件:{win_condition}，warshipId:{condition[1]}，不在目标表中")
+        if end_condition != "" and end_condition != "[]" and end_condition != "[[]]":
+            for condition in end_condition_list:
+                if condition[0] in warship_type_list:
+                    if condition[1] not in target_warship_id_list:
+                        CheckLog.add(f"{table_name}表{row.get_index()}行,combatunitid为{combat_unit_id}的end条件:{end_condition}，warshipId:{condition[1]}，不在目标表中")
+        if sp_condition != "" and sp_condition != "[]" and sp_condition != "[[]]":
+            for condition in sp_condition_list:
+                if condition[0] not in target_warship_id_list:
+                    CheckLog.add(f"{table_name}表{row.get_index()}行,combatunitid为{combat_unit_id}的sp条件:{sp_condition}，warshipId:{condition[0]}，不在目标表中")
+               
+
 #检测2维数组index的值是否在ref_table的ref_column列中
 def check_array2_in_column(alltable, config):
     table_name = config.get('table')
@@ -339,7 +422,7 @@ def get_excel_table_data_type_list(all_excel_table):
     return data_type_dict
 
 def read_json_config():
-    path = r"/root/myproject/game-flask-server/apps/scripts/rule.json"
+    path = r""
     with open(path, 'r', encoding='utf-8') as f:
         rules = json.load(f)
     return rules.get('relashionships')
@@ -356,7 +439,9 @@ def check_from_config(alltable, json_config):
         "value-must-set": check_value_must_set,
         "columns-value-check": check_columns_value,
         "columns-only-one": check_columns_only_one,
-        "array2-in-column":check_array2_in_column
+        "array2-in-column":check_array2_in_column,
+        "combat-cycle-check" : check_combat_mission_params,
+        "combat-condition-warship-check":check_combat_condittion_warship
     }
     
     for config in json_config:

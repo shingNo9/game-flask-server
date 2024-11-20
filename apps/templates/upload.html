@@ -16,23 +16,39 @@
 <div id="responseMessage"></div>
 <form class="layui-form layui-form-pane" action="">
     <div class="layui-form-item">
-
+        <p>选择需要上传的包体（来自<a href="url">url</a>下载界面）</p>
+        <br />
             <select name="name" lay-verify="required" id="selectoption">
             </select>
             <br />
-            <button type="button" class="layui-btn" onclick="uploadfile()">上传包体至ftp</button>
+            <!--
             <div class="layui-form-item">
-                <input type="text" name="title" required  lay-verify="required" placeholder="自定义名称" autocomplete="off" class="layui-input">
-
+                
+                <input type="text" name="title" required  lay-verify="required" placeholder="自定义名称" autocomplete="off" class="layui-input" id="inputname">
+                
               </div>
+            
             <div class="layui-form-item" id="checkbox">
-                <input type="checkbox" name="like[write]" value="1" title="国内">
-                <input type="checkbox" name="like[read]" value="2" title="gm" checked>
-                <input type="checkbox" name="like[dai]" value="3" title="sdk">
-              </div>
+                <input type="checkbox" name="like[write]" value="1" title=".apk（国内）">
+                <input type="checkbox" name="like[read]" value="2" title=".apk（海外）" checked>
+                <button type="button" class="layui-btn" onclick="socketest()" id="sendEvent">socketest</button>
+            </div>
+            -->
+            <div class="layui-form-item">
+                <label class="layui-form-label">包名</label>
+                <div class="layui-input-block">
+                  <input type="radio" name="pkgname" value="1" title="pkg.apk（国内）">
+                  <input type="radio" name="pkgname" value="2"  title="pkg.apk（海外）"  checked>
+                </div>
+            </div>
+            <br />
+            <button type="button" class="layui-btn" onclick="uploadfile()">上传包体ftp</button>
             <hr />
             <code id="showresult"></code>
             <hr />
+            <code id="response"></code>
+            <code id="sendEvent"></code>
+            
     </div>
 </form>
  
@@ -41,6 +57,7 @@
 {% block scripts %}
 <script>
     function load(){
+        /*
         $.ajax({
             url: '/download-namelist',
             type: 'GET', 
@@ -53,6 +70,8 @@
                 console.error('Error:', error);
             }
         });
+        */
+        getRequest('/download-namelist', setSelectOption);
     }
 
     function setSelectOption(data)
@@ -78,13 +97,25 @@
         var value = selectElement.value;
         var selectedText = selectElement.options[value].text;
         //console.log(selectedText);
-        filePost(selectedText);
-        getSelectedValue();
+        var pkgname = getSelectedRadioValue();
+        //var inputname = getInputValue();
+        
+        var data = JSON.stringify({
+            data:{
+                file: selectedText,
+                rename: pkgname,
+            }
+        })
+        //console.log(data);
+        filePost(data);
+        //getSelectedValue();
     }
     
-    function filePost(fileNanme){
-        const requestData = JSON.stringify({ data: fileNanme });
+    function filePost(data){
+        const requestData = JSON.stringify({ data: data });
         //console.log(requestData);
+        postRequest('/file-to-ftp', requestData, showDownloadUrl);
+        /*
         $.ajax({
             url: '/file-to-ftp',
             type: 'POST',
@@ -100,11 +131,18 @@
                 console.error('Error:', error);
             }
         });
+        */
     }
 
     function showDownloadUrl(data) {
         var responseMessage = document.getElementById("showresult");
         responseMessage.innerHTML = data;
+    }
+
+    function getInputValue() {
+        var inputname = document.getElementById("inputname").value;
+        console.log(inputname);
+        return inputname;
     }
 
     function getSelectedValue() {
@@ -126,6 +164,68 @@
 
         // 输出已勾选的内容
         console.log("勾选的内容:", selectedTitles);
+    }
+
+    function getSelectedRadioValue() {
+        // 获取所有单选框
+        const radios = document.getElementsByName('pkgname');
+        
+        // 遍历单选框，查找被选中的
+        for (let i = 0; i < radios.length; i++) {
+                if (radios[i].checked) {
+                    return radios[i].value;  // 返回选中的单选框的值
+                }
+            }
+        return null; // 如果没有选中的单选框，返回 null
+    }
+    
+    function initializeSocket() {
+            // 连接到服务器
+            const socket = io('http://192.168.1.220:8888');
+
+            // 监听连接成功
+            socket.on("connect", () => {
+                console.log("成功连接到服务器");
+                console.log("客户端 ID:", socket.id);
+            });
+
+            // 监听来自服务器的响应
+            socket.on('process_response1', (data) => {
+                document.getElementById('response').innerText += data.data + "\n";
+                console.log("收到服务器响应:", data);
+            });
+
+            // 发送自定义事件
+            document.getElementById('sendEvent').addEventListener('click', () => {
+                socket.emit('my_event', { data: 'Hello, Server!' });
+            });
+        }
+
+        // 调用初始化函数
+        //initializeSocket();
+
+        function socketest(){
+            const socket = io('http://192.168.1.220:8888');
+            
+            var selectElement = document.getElementById('selectoption');
+            var value = selectElement.value;
+            var selectedText = selectElement.options[value].text;
+            var inputname = getInputValue();
+            var data = JSON.stringify({
+                data:{
+                    file: selectedText,
+                    rename: inputname,
+                }
+            })
+            const requestData = JSON.stringify({ data: data });
+            //socket.emit('my_event', { data: requestData });
+            socket.emit('my_event', requestData);
+            //console.log(requestData);
+        //postRequest('/file-to-ftp', requestData, showDownloadUrl);
+        socket.on('process_response', (data) => {
+                document.getElementById('response').innerText += data.data + "\n";
+                console.log("收到服务器响应:", data);
+            });
     }
 </script>
 {% endblock %}

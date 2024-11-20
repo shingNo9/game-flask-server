@@ -1,13 +1,13 @@
 import subprocess
+from datetime import datetime, timedelta
 
-SVNPATH_SERVER = "/server"
-SVNPATH_CLIENT = "/client/UnityClient2021New/Assets"
+SVNPATH_SERVER = ""
+SVNPATH_CLIENT = ""
 
 def get_svn_info():
-    #svn log -r {2024-10-01}:{2024-10-10}/client/UnityClient2021New/Assets
-    svn_path = ""
-    start_time = "2024-10-01"
-    end_time = "2024-10-11T23:59:59"
+    this_friday, last_friday = get_week_number()
+    start_time = last_friday
+    end_time = f"{this_friday}T23:59:59"
     cmd_client = f"svn log -r {{{start_time}}}:{{{end_time}}} {SVNPATH_CLIENT}" 
     client_result = execute_bash(cmd_client)
 
@@ -29,6 +29,17 @@ def execute_bash(bash_cmd):
     #print(result.stdout)
     return result.stdout
 
+def get_week_number():
+    today = datetime.now()
+    weekday = today.weekday()
+    this_friday = today + timedelta(days=(4 - weekday))
+    last_friday = this_friday - timedelta(days=7)
+    if weekday == 4:
+        last_friday = today - timedelta(days=7)
+    this_friday = this_friday.strftime("%Y-%m-%d")
+    last_friday = last_friday.strftime("%Y-%m-%d")
+    return this_friday, last_friday
+
 class svn_log:
     def __init__(self, log_str):
         self.msg_list = []
@@ -47,3 +58,4 @@ class svn_log:
                     commint_msg += msg[i]
 
             self.msg_list.append(commint_msg)
+

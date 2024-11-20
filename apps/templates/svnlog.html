@@ -1,8 +1,8 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.0.7/wordcloud2.js"></script>
-<!--
+<!--<script src="https://cdnjs.cloudflare.com/ajax/libs/wordcloud2.js/1.0.7/wordcloud2.js"></script>
+
     write here
 -->
 <button type="button" class="layui-btn" onclick="showrule()" id="searchbtn">获取svnlog</button>
@@ -10,6 +10,7 @@
 <code id="showresult"></code>
 <hr />
 <div id="wordCloud" style="width: 600px; height: 400px;"></div>
+
 
 {% endblock %}
 
@@ -31,15 +32,16 @@
     }
 
     function displayCheckResult(data) {
-    const logElement = document.getElementById('showresult');
-    let resultString = "";
+      const logElement = document.getElementById('showresult');
+      let resultString = "";
 
-    data.forEach(item => {
-        resultString += item + "<br>";
-    });
+      data.forEach(item => {
+          resultString += item + "<br>";
+      });
 
-    logElement.innerHTML = resultString;
-}
+      logElement.innerHTML = resultString;
+    }
+
   
 </script>
 {% endblock %}

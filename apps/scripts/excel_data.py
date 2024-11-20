@@ -208,6 +208,7 @@ class HeadName(Enum):
 
 class BagTypeDict:
     def __init__(self):
+        
         self.type_dict = {
             1: {"table": "Item", "column": "itemId"},
             2: {"table": "Equipment", "column": "equipmentId"},
